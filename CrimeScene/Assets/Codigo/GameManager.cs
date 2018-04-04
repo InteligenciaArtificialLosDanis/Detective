@@ -7,29 +7,51 @@ public class GameManager : MonoBehaviour {
 	public static GameManager instance;
 
 	//Public GameObject
-	public GameObject nube;
-	public GameObject hueco;
-	public GameObject suelo;
-	public GameObject sangre;
-	public GameObject nubeSangre;
+	public GameObject suelo; 		 
+	public GameObject nube;	 		  
+	public GameObject hueco; 		
+	public GameObject sangre;		
+	public GameObject nubeSangre;    
+	public GameObject casa;			
 
 	//Agentes de la escena del crimen
-	public GameObject agente;
-	public GameObject muerto;
+	public GameObject agente;		
+	public GameObject muerto;		
 	public GameObject arma;
+
 	int xArma, yArma;
+	int xMuerto, yMuerto;
+	int xCasa, yCasa;
+
+	//SUper enumerado de estados de juego :3
+	enum TipoCasilla {
+		vacio,
+		hueco, sueloVacio, sueloArma, 
+		nubeVacia, nubeSangre, nubeArma, nubeSangreArma, 
+		sangreVacia, sangreArma, muertoVacio, muertoArma,
+		casa
+	};
 
 	//Constantes útiles
 	const int anchoTablero = 10;
 	const int altoTablero = 5;
 	const int numHuecos = 4;
 
-	GameObject [,] tablero;
+	//GameObject [,] tablero;
+	TipoCasilla [,] tablero;
 
 	// Use this for initialization
 	void Start () {
 
-		tablero = new GameObject [anchoTablero, altoTablero];
+		tablero = new TipoCasilla [anchoTablero, altoTablero];
+		//Creamos el tablero todo a vacio.
+		for (int i = 0; i < anchoTablero; i++) {
+			for (int j = 0; j < altoTablero; j++) {
+				tablero [i, j] = TipoCasilla.vacio;
+			}
+		}
+		creaTablero (tablero);
+		instanciaMovidas (tablero);
 	}
 	
 	// Update is called once per frame
@@ -37,63 +59,160 @@ public class GameManager : MonoBehaviour {
 		
 	}
 
+	void instanciaMovidas(TipoCasilla[,]tablero){
+	
+		for (int i = 0; i < anchoTablero; i++) {
+			for (int j = 0; j < altoTablero; j++) {
 
-	void creaTablero(GameObject[,] tablero){
+				switch (tablero [i, j]) {
+
+				case TipoCasilla.sueloVacio: //SUELO
+					instanciameEsta(suelo,i,j);
+					break;
+
+				case TipoCasilla.sueloArma: //SUELO con ARMA
+					instanciameEsta(suelo,i,j);
+					instanciameEsta(arma,i,j);
+					break;
+
+				case TipoCasilla.hueco: //HUECO
+					instanciameEsta (hueco, i, j);
+					break;
+				//--nubes
+				case TipoCasilla.nubeVacia:
+					instanciameEsta (nube, i, j);
+					break;
+
+				case TipoCasilla.nubeSangre:
+					instanciameEsta (nubeSangre, i, j);
+					break;
+
+				case TipoCasilla.nubeArma:
+					instanciameEsta (nube, i, j);
+					instanciameEsta (arma, i, j);
+					break;
+
+				case TipoCasilla.nubeSangreArma:
+					instanciameEsta (nubeSangre, i, j);
+					instanciameEsta (arma, i, j);
+					break;
+				//--sangre
+				case TipoCasilla.sangreVacia:
+					instanciameEsta (sangre, i, j);
+					break;
+
+
+				case TipoCasilla.sangreArma:
+					instanciameEsta (sangre, i, j);
+					instanciameEsta (arma, i, j);
+					break;
+
+				//--muerto
+				
+				case TipoCasilla.muertoVacio:
+					instanciameEsta (muerto, i, j);
+					break;
+
+
+				case TipoCasilla.muertoArma:
+					instanciameEsta (muerto, i, j);
+					instanciameEsta (arma, i, j);
+					break;
+
+				//-casa
+				case TipoCasilla.casa:
+					instanciameEsta (casa, i, j);
+					break;
+
+				}
+			}
+		}
+	}
+
+	void instanciameEsta (GameObject obj, int x, int y){
+		Instantiate (obj, new Vector3 (x, y, 0), Quaternion.identity);
+	}
+
+
+	//CREA EL TABLERO DE JUEGO EN TERMINOS DE INFORMACIÓN
+	void creaTablero(TipoCasilla[,] tablero){
 
 		//Tenemos el tablero vacío, de dimensiones ya definidas, y vamos a situar los huecos 
-		Random rnd = new Random();
 		int x, y;
 		//Primero los huecos y las nubes
 		for (int i = 0; i < numHuecos; i++) {
 			
 			do{
-				x = rnd.Next(0,anchoTablero);
-				y = rnd.Next(0,altoTablero);
+				x = Random.Range(0,anchoTablero);
+				y = Random.Range(0,altoTablero);
 
-			} while (tablero[x,y] == hueco);
+			} while (tablero[x,y] == TipoCasilla.hueco);
 
-			tablero [x, y] = hueco;
+			tablero [x, y] = TipoCasilla.hueco;
+
 			creaNubes (x, y);
 		}
 
 		//Después metemos el cadaver y la sangre :3
 		do{
-			x = rnd.Next(0,anchoTablero);
-			y = rnd.Next(0,altoTablero);
+			x = Random.Range(0,anchoTablero);
+			y = Random.Range(0,altoTablero);
 
 
-		} while (tablero[x,y]== hueco || tablero[x,y] == nube);
-		tablero [x, y] = muerto;
-		creaSangre (x, y);
+		} while (tablero[x,y]== TipoCasilla.hueco || tablero[x,y] == TipoCasilla.nubeVacia);
+
+		tablero [x, y] = TipoCasilla.muertoVacio;
+		xMuerto = x;
+		yMuerto = y;
+		creaSangre (x, y);	//Crea la sangre y cambia la matriz si es necesario
+		ponArma (x, y);		//Crea el arma en la zona cercana al cadaver
 
 		//Relleno el resto de huecos con casillas normales
+		for (int i = 0; i < anchoTablero; i++) {
+			for (int j = 0; j < altoTablero; j++) {
+				//Si es null implica que no se ha llenado.
+				if (tablero [i, j] == TipoCasilla.vacio) {
+					tablero [i, j] = TipoCasilla.sueloVacio;
+				}
+			}
+		}
 
+		//Finalmente, ponemos la casa y el personaje en el mismo sítio
+		do{
+			x = Random.Range(0,anchoTablero);
+			y = Random.Range(0,altoTablero);
+
+		} while (tablero[x,y] != TipoCasilla.sueloVacio);
+
+		tablero [x, y] = TipoCasilla.casa;
+		xCasa = x;
+		yCasa = y;
 		
 	}
 
 
-	void creaNubes(int x, int y){
+ 	void creaNubes(int x, int y){
 
 		//Norte
-		if (y + 1 > 0 && tablero [x, y + 1] != hueco) {
+		if (y - 1 >= 0 && tablero [x, y - 1] != TipoCasilla.hueco) {
 
 			//No compruebo con la sangre porque esto es primero
-			tablero [x, y + 1] = nube;
+			tablero [x, y - 1] = TipoCasilla.nubeVacia;
 		}
 
 		//Sur
-		if (y - 1 < altoTablero && tablero [x, y - 1] != hueco) {
-			tablero [x, y - 1] = nube;
+		if (y + 1 < altoTablero && tablero [x, y + 1] != TipoCasilla.hueco) {
+			tablero [x, y + 1] = TipoCasilla.nubeVacia;
 		}
 
 		//Izquierda
-		if (x - 1 > 0 && tablero [x - 1, y] != hueco) {
-			tablero [x, y - 1] = nube;
+		if (x - 1 >= 0 && tablero [x - 1, y] != TipoCasilla.hueco) {
+			tablero [x-1, y ] = TipoCasilla.nubeVacia;
 		}
 
 		//Derecha
-		if (x + 1 < anchoTablero  && tablero [x + 1, y] != hueco) {
-			tablero [x + 1, y] = nube;
+		if (x + 1 < anchoTablero  && tablero [x + 1, y] != TipoCasilla.hueco) {
+			tablero [x + 1, y] = TipoCasilla.nubeVacia;
 		}
 
 	}
@@ -102,43 +221,70 @@ public class GameManager : MonoBehaviour {
 	void creaSangre(int x, int y){
 
 		//Norte
-		if (y + 1 > 0 && tablero [x, y + 1] != nube) {
-
-			//No compruebo con la sangre porque esto es primero
-			tablero [x, y + 1] = sangre;
+		if (y - 1 >= 0) {
+			if(tablero [x, y - 1] != TipoCasilla.nubeVacia)
+				tablero [x, y - 1] = TipoCasilla.sangreVacia;
+				
+			else tablero [x, y - 1] = TipoCasilla.nubeSangre;
 		}
-		else tablero [x, y + 1] = nubeSangre;
+	
 
 		//Sur
-		if (y - 1 < altoTablero && tablero [x, y - 1] != nube) {
-			tablero [x, y - 1] = sangre;
+		if (y + 1 < altoTablero) {
+			if(tablero [x, y + 1] != TipoCasilla.nubeVacia)
+				tablero [x, y + 1] = TipoCasilla.sangreVacia;
+			
+			else tablero [x, y + 1] = TipoCasilla.nubeSangre;
 		}
-		else tablero [x, y + 1] = nubeSangre;
+
 
 		//Izquierda
-		if (x - 1 > 0 && tablero [x - 1, y] != nube) {
-			tablero [x, y - 1] = sangre;
+		if (x - 1 >= 0) {
+			if( tablero [x - 1, y] != TipoCasilla.nubeVacia)
+				tablero [x-1, y] = TipoCasilla.sangreVacia;
+
+			else tablero [x-1, y] = TipoCasilla.nubeSangre;
 		}
-		else tablero [x, y + 1] = nubeSangre;
+
 
 		//Derecha
-		if (x + 1 < anchoTablero  && tablero [x + 1, y] != nube) {
-			tablero [x + 1, y] = sangre;
+		if (x + 1 < anchoTablero) {
+			if(tablero [x + 1, y] != TipoCasilla.nubeVacia)
+				tablero [x + 1, y] = TipoCasilla.sangreVacia;
+			
+			else tablero [x+ 1, y ] = TipoCasilla.nubeSangre;
 		}
-		else tablero [x, y + 1] = nubeSangre;
+
 	}
 
 	void ponArma(int x, int y){
 		int i, j;
 		do {
 
-			i = rnd.Next (-1, 2);
-			j = rnd.Next (-1, 2);
-		} while (tablero [x + i, y + j] == hueco);
-	
-		//TODO: Set de la posición del arma
+			i = Random.Range (-1, 2);
+			j = Random.Range (-1, 2);
+		} while (tablero [x + i, y + j] == TipoCasilla.hueco);
+
+		//Set de la posición del arma
 		xArma = x + i;
 		yArma = y + j;
+		//Definimos la información mas detallada ;)
+		//Con suelo vacio
+		if (tablero [x + i, y + j] == TipoCasilla.sueloVacio)
+			tablero [x + i, y + j] = TipoCasilla.sueloArma;
+		//con nube vacia
+		else if (tablero [x + i, y + j] == TipoCasilla.nubeVacia)
+			tablero [x + i, y + j] = TipoCasilla.nubeArma;
+		//Con nube con sangre
+		else if (tablero [x + i, y + j] == TipoCasilla.nubeSangre)
+			tablero [x + i, y + j] = TipoCasilla.nubeSangreArma;
+		//Con la sangre
+		else if (tablero [x + i, y + j] == TipoCasilla.sangreVacia)
+			tablero [x + i, y + j] = TipoCasilla.sangreArma;
+		//Con el cadaver
+		else if (tablero [x + i, y + j] == TipoCasilla.muertoVacio)
+			tablero [x + i, y + j] = TipoCasilla.muertoArma;
+
 	}
 
 }
