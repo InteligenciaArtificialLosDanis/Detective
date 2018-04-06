@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/CrimeScene.unity
+- path: Assets/Scenes/CrimeScene.unity
   isLoaded: 1
   isActive: 1

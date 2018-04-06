@@ -32,9 +32,9 @@ public class GameManager : MonoBehaviour {
 	};
 
 	//Constantes útiles
-	const int anchoTablero = 10;
-	const int altoTablero = 5;
-	const int numHuecos = 4;
+	 const int anchoTablero = 10;
+     const int altoTablero = 5;
+     const int numHuecos = 4;
 
 	//GameObject [,] tablero;
 	TipoCasilla [,] tablero;
@@ -58,6 +58,35 @@ public class GameManager : MonoBehaviour {
 		
 	}
 
+
+    ///////////////////////////////////////
+    //__MÉTODOS DE COMUNICACION CON IA___//
+    ///////////////////////////////////////
+    public TipoCasilla getInfoCasilla(int x, int y)
+    {
+        return tablero[x, y];
+    }
+
+    public void retiraGameObject(string obj)
+    {
+        if (obj == "muerto")
+        {
+            //Poner el muerto a invisible
+        }
+        else if (obj == "arma")
+        {
+            //Poner el arma a invisible
+        }
+    }
+
+    void getDimensiones(out int alto, out int ancho) {
+        alto = altoTablero;
+        ancho = anchoTablero;
+    }
+
+    ///////////////////////////////////////
+    //__MÉTODOS DE CREACIÓN DE TABLERO___//
+    ///////////////////////////////////////
 	void instanciaMovidas(TipoCasilla[,]tablero){
 	
 		for (int i = 0; i < anchoTablero; i++) {
@@ -344,8 +373,7 @@ public class GameManager : MonoBehaviour {
 
         } while (!ok);
 
-	
-	
+
 		
 
 	}
