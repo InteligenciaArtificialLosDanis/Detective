@@ -10,7 +10,7 @@ public class IAManager : MonoBehaviour {
 
     enum modoAgente {Patrullando, Analizando, Volviendo, Muerto}
 
-    enum percepcionCasilla {ok, desconocido, nube, riesgo, niDePutaCoña, objetivo}
+    enum percepcionCasilla {ok, desconocido, nube, riesgo, objetivo}
 
     enum MovimientoAgente { Arriba, Abajo, Izquierda, Derecha}
 
@@ -64,7 +64,7 @@ public class IAManager : MonoBehaviour {
     //Módulo para el estado de patrulla
     void patrulla()
     {
-
+        //Te dan la info. Si ya tienes algo en plan has asumido una nube y la pones a ok, cuando te llegue dicha nube la pondrás a lo que es: una nube.
     }
 
     //Fragmento que nos permite determinar con lógica guapa guapa dónde están los huecos (y la sangre?)
@@ -72,25 +72,194 @@ public class IAManager : MonoBehaviour {
     //Premisa: Estas en una casilla con nube.
     void analizaTerreno(int x, int y)
     {
+        //Booleanos de control: para evitar modificar un punto cardinal dos veces
+        bool norteOk = false;
+        bool surOk = false;
+        bool esteOk = false;
+        bool oesteOk = false;
         //Intento averiguar:
-        //NORTE
+
+        //--------NORTE------------
         //Si no hemos estado en el norte...
-        if (y - 1 >= 0 && tableroIA[x, y - 1].infoCasilla == percepcionCasilla.desconocido)
+        if (y - 1 >= 0 && (tableroIA[x, y - 1].infoCasilla == percepcionCasilla.desconocido || tableroIA[x, y - 1].infoCasilla == percepcionCasilla.riesgo))
         {
             //Buscamos informacion en las diagonales
             //Diagonal Izq
-            if (x - 1 >= 0 && y - 1 >= 0 && tableroIA[x - 1, y - 1].infoCasilla != percepcionCasilla.desconocido && tableroIA[x - 1, y - 1].infoCasilla != percepcionCasilla.niDePutaCoña)
+            if (x - 1 >= 0 && y - 1 >= 0 && tableroIA[x - 1, y - 1].infoCasilla != percepcionCasilla.desconocido && !norteOk)
             {
-                //Queremos ver si es: ok, nube
+                //Queremos ver si es: ok
+                if (tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.ok)
+                {
+                    tableroIA[x, y - 1].infoCasilla = percepcionCasilla.ok;
+                    norteOk = true; 
+                }
+                 //Queremos ver si es nube.
+                else if (tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.riesgo)
+                {
+                    
+                    tableroIA[x, y - 1].infoCasilla = percepcionCasilla.riesgo;
+                }
             }
 
-            else if (x + 1 < anchoTablero && y - 1 >= 0 && tableroIA[x + 1, y - 1].infoCasilla != percepcionCasilla.desconocido)
+
+            //Diagonal Derecha
+            else if (x + 1 < anchoTablero && y - 1 >= 0 && tableroIA[x + 1, y - 1].infoCasilla != percepcionCasilla.desconocido && !norteOk)
             {
+                //Queremos ver si es: ok
+                if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.ok)
+                {
+                    tableroIA[x, y - 1].infoCasilla = percepcionCasilla.ok; //Norte es ok
+                    norteOk = true; 
+                }
+                //Queremos ver si es nube.
+                else if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x+1,y-1].infoCasilla == percepcionCasilla.riesgo)
+                {
+
+                    tableroIA[x, y - 1].infoCasilla = percepcionCasilla.riesgo; //Hay riesgo en norte
+                }
 
             }
 
             //Cuando no puedes determinar por los medios dados la información que contiene, la ponemos a riesgo.
             else tableroIA[x,y-1].infoCasilla = percepcionCasilla.riesgo;
+
+        }
+
+        //--------SUR------------
+        //Si no hemos estado en el sur...
+        if (y + 1 < altoTablero && (tableroIA[x, y + 1].infoCasilla == percepcionCasilla.desconocido || tableroIA[x, y + 1].infoCasilla == percepcionCasilla.riesgo))
+        {
+            //Buscamos informacion en las diagonales
+            //Diagonal Izq
+            if (x - 1 >= 0 && y + 1 < altoTablero && tableroIA[x - 1, y + 1].infoCasilla != percepcionCasilla.desconocido && !surOk)
+            {
+                //Queremos ver si es: ok
+                if (tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.ok)
+                {
+                    tableroIA[x, y + 1].infoCasilla = percepcionCasilla.ok;
+                    surOk = true;
+                }
+                //Queremos ver si es nube.
+                else if (tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.nube || tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.riesgo)
+                {
+
+                    tableroIA[x, y + 1].infoCasilla = percepcionCasilla.riesgo;
+                }
+            }
+
+
+            //Diagonal Derecha
+            else if (x + 1 < anchoTablero && y + 1 < altoTablero && tableroIA[x + 1, y + 1].infoCasilla != percepcionCasilla.desconocido && !surOk)
+            {
+                //Queremos ver si es: ok
+                if (tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.ok)
+                {
+                    tableroIA[x, y + 1].infoCasilla = percepcionCasilla.ok; //Sur es ok
+                    surOk = true;
+                }
+                //Queremos ver si es nube.
+                else if (tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.nube || tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.riesgo)
+                {
+
+                    tableroIA[x, y + 1].infoCasilla = percepcionCasilla.riesgo; //Hay riesgo en sur
+                }
+
+            }
+
+            //Cuando no puedes determinar por los medios dados la información que contiene, la ponemos a riesgo.
+            else tableroIA[x, y + 1].infoCasilla = percepcionCasilla.riesgo;
+
+        }
+
+        //--------ESTE------------
+        //Si no hemos estado en el este...
+        if (x + 1 < anchoTablero && (tableroIA[x + 1, y].infoCasilla == percepcionCasilla.desconocido || tableroIA[x + 1, y ].infoCasilla == percepcionCasilla.riesgo))
+        {
+            //Buscamos informacion en las diagonales
+            //Diagonal Arriba
+            if (x + 1 < anchoTablero && y - 1 >= 0 && tableroIA[x + 1, y - 1].infoCasilla != percepcionCasilla.desconocido && !esteOk)
+            {
+                //Queremos ver si es: ok
+                if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.ok)
+                {
+                    tableroIA[x + 1, y].infoCasilla = percepcionCasilla.ok;
+                    esteOk = true;
+                }
+                //Queremos ver si es nube.
+                else if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.riesgo)
+                {
+
+                    tableroIA[x + 1, y].infoCasilla = percepcionCasilla.riesgo;
+                }
+            }
+
+
+            //Diagonal Abajo
+            else if (x + 1 < anchoTablero && y + 1 < altoTablero && tableroIA[x + 1, y + 1].infoCasilla != percepcionCasilla.desconocido && !esteOk)
+            {
+                //Queremos ver si es: ok
+                if (tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.ok)
+                {
+                    tableroIA[x + 1, y].infoCasilla = percepcionCasilla.ok; //Este es ok
+                    esteOk = true;
+                }
+                //Queremos ver si es nube.
+                else if (tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.nube || tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.riesgo)
+                {
+
+                    tableroIA[x + 1, y].infoCasilla = percepcionCasilla.riesgo; //Hay riesgo en este
+                }
+
+            }
+
+            //Cuando no puedes determinar por los medios dados la información que contiene, la ponemos a riesgo.
+            else tableroIA[x, y - 1].infoCasilla = percepcionCasilla.riesgo;
+
+        }
+
+        //--------OESTE------------
+        //Si no hemos estado en el oeste...
+        if (x - 1 < anchoTablero && (tableroIA[x - 1, y].infoCasilla == percepcionCasilla.desconocido || tableroIA[x - 1, y].infoCasilla == percepcionCasilla.riesgo))
+        {
+            //Buscamos informacion en las diagonales
+            //Diagonal Arriba
+            if (x - 1 >= 0 && y - 1 >= 0 && tableroIA[x - 1, y - 1].infoCasilla != percepcionCasilla.desconocido && !oesteOk)
+            {
+                //Queremos ver si es: ok
+                if (tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.ok)
+                {
+                    tableroIA[x - 1, y].infoCasilla = percepcionCasilla.ok;
+                    oesteOk = true;
+                }
+                //Queremos ver si es nube.
+                else if (tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.riesgo)
+                {
+
+                    tableroIA[x - 1, y].infoCasilla = percepcionCasilla.riesgo;
+                }
+            }
+
+
+            //Diagonal Abajo
+            else if (x - 1 >= 0 && y + 1 < altoTablero && tableroIA[x - 1, y + 1].infoCasilla != percepcionCasilla.desconocido && !oesteOk)
+            {
+                //Queremos ver si es: ok
+                if (tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.ok)
+                {
+                    tableroIA[x - 1, y].infoCasilla = percepcionCasilla.ok; //Oeste es ok
+                    oesteOk = true;
+                }
+                //Queremos ver si es nube.
+                else if (tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.nube || tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.riesgo)
+                {
+
+                    tableroIA[x - 1, y].infoCasilla = percepcionCasilla.riesgo; //Hay riesgo en oeste
+                }
+
+            }
+
+            //Cuando no puedes determinar por los medios dados la información que contiene, la ponemos a riesgo.
+            else tableroIA[x - 1, y].infoCasilla = percepcionCasilla.riesgo;
 
         }
 
