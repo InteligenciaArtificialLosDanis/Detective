@@ -188,7 +188,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 251377066}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -8}
+  m_LocalPosition: {x: 3, y: 2, z: -8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -221,7 +221,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a076111aed2a27d4b8f9b42aa1a3a8c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  suelo: {fileID: 1411647125006194, guid: 68701474c000f964b9a897e468a4aa16, type: 2}
   nube: {fileID: 1716014792505566, guid: f8c09d0fccaebfd46b96da9529f3fb24, type: 2}
+  hueco: {fileID: 1856435733586806, guid: f3c1bf501b478264db11622cf58894fd, type: 2}
+  sangre: {fileID: 1650613176652462, guid: 968b404055311f047b3db6a46b78fcb3, type: 2}
+  nubeSangre: {fileID: 1125407210733366, guid: 6321ab18520784e449c4f545c4a16260, type: 2}
+  casa: {fileID: 1398979526213238, guid: 1ce3294e66be38c4b88fa446bd115b5c, type: 2}
+  agente: {fileID: 1457930428022712, guid: 67cc0e7111fbdb84a9a5e067846f85ed, type: 2}
+  muerto: {fileID: 1934311578281818, guid: 195a38a810852834885bd464461c0921, type: 2}
+  arma: {fileID: 1101610884656242, guid: 92bce80face48ee4f8eb7c0147dee141, type: 2}
 --- !u!4 &1425516861
 Transform:
   m_ObjectHideFlags: 0
@@ -234,4 +242,32 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2079097086
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 2079097087}
+  m_Layer: 0
+  m_Name: IA
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2079097087
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2079097086}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.1842668, y: 2.4546685, z: -0.041992188}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

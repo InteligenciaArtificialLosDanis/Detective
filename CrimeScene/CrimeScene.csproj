@@ -319,6 +319,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Codigo\GameManager.cs" />
+    <Compile Include="Assets\Codigo\IAManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

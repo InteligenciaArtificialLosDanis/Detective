@@ -27,9 +27,8 @@ public class GameManager : MonoBehaviour {
 	enum TipoCasilla {
 		vacio,
 		hueco, sueloVacio, sueloArma, 
-		nubeVacia, nubeSangre, nubeArma, nubeSangreArma, 
-		sangreVacia, sangreArma, muertoVacio, muertoArma,
-		casa
+		nubeVacia, nubeSangre,
+		sangre, muerto, casa
 	};
 
 	//Constantes útiles
@@ -87,42 +86,25 @@ public class GameManager : MonoBehaviour {
 					instanciameEsta (nubeSangre, i, j);
 					break;
 
-				case TipoCasilla.nubeArma:
-					instanciameEsta (nube, i, j);
-					instanciameEsta (arma, i, j);
-					break;
-
-				case TipoCasilla.nubeSangreArma:
-					instanciameEsta (nubeSangre, i, j);
-					instanciameEsta (arma, i, j);
-					break;
 				//--sangre
-				case TipoCasilla.sangreVacia:
+				case TipoCasilla.sangre:
 					instanciameEsta (sangre, i, j);
 					break;
 
 
-				case TipoCasilla.sangreArma:
-					instanciameEsta (sangre, i, j);
-					instanciameEsta (arma, i, j);
-					break;
-
+				
 				//--muerto
 				
-				case TipoCasilla.muertoVacio:
+				case TipoCasilla.muerto:
 					instanciameEsta (muerto, i, j);
 					break;
 
-
-				case TipoCasilla.muertoArma:
-					instanciameEsta (muerto, i, j);
-					instanciameEsta (arma, i, j);
-					break;
 
 				//-casa
 				case TipoCasilla.casa:
 					instanciameEsta (casa, i, j);
-					break;
+                    instanciameEsta(agente, i, j);
+                    break;
 
 				}
 			}
@@ -161,7 +143,7 @@ public class GameManager : MonoBehaviour {
 
 		} while (tablero[x,y]== TipoCasilla.hueco || tablero[x,y] == TipoCasilla.nubeVacia);
 
-		tablero [x, y] = TipoCasilla.muertoVacio;
+		tablero [x, y] = TipoCasilla.muerto;
 		xMuerto = x;
 		yMuerto = y;
 		creaSangre (x, y);	//Crea la sangre y cambia la matriz si es necesario
@@ -223,7 +205,7 @@ public class GameManager : MonoBehaviour {
 		//Norte
 		if (y - 1 >= 0) {
 			if(tablero [x, y - 1] != TipoCasilla.nubeVacia)
-				tablero [x, y - 1] = TipoCasilla.sangreVacia;
+				tablero [x, y - 1] = TipoCasilla.sangre;
 				
 			else tablero [x, y - 1] = TipoCasilla.nubeSangre;
 		}
@@ -232,7 +214,7 @@ public class GameManager : MonoBehaviour {
 		//Sur
 		if (y + 1 < altoTablero) {
 			if(tablero [x, y + 1] != TipoCasilla.nubeVacia)
-				tablero [x, y + 1] = TipoCasilla.sangreVacia;
+				tablero [x, y + 1] = TipoCasilla.sangre;
 			
 			else tablero [x, y + 1] = TipoCasilla.nubeSangre;
 		}
@@ -241,7 +223,7 @@ public class GameManager : MonoBehaviour {
 		//Izquierda
 		if (x - 1 >= 0) {
 			if( tablero [x - 1, y] != TipoCasilla.nubeVacia)
-				tablero [x-1, y] = TipoCasilla.sangreVacia;
+				tablero [x-1, y] = TipoCasilla.sangre;
 
 			else tablero [x-1, y] = TipoCasilla.nubeSangre;
 		}
@@ -250,7 +232,7 @@ public class GameManager : MonoBehaviour {
 		//Derecha
 		if (x + 1 < anchoTablero) {
 			if(tablero [x + 1, y] != TipoCasilla.nubeVacia)
-				tablero [x + 1, y] = TipoCasilla.sangreVacia;
+				tablero [x + 1, y] = TipoCasilla.sangre;
 			
 			else tablero [x+ 1, y ] = TipoCasilla.nubeSangre;
 		}
@@ -258,32 +240,113 @@ public class GameManager : MonoBehaviour {
 	}
 
 	void ponArma(int x, int y){
-		int i, j;
-		do {
+        int caso;
+        bool ok = false;
+        do {
 
-			i = Random.Range (-1, 2);
-			j = Random.Range (-1, 2);
-		} while (tablero [x + i, y + j] == TipoCasilla.hueco);
+            caso = Random.Range(0, 9);
 
-		//Set de la posición del arma
-		xArma = x + i;
-		yArma = y + j;
-		//Definimos la información mas detallada ;)
-		//Con suelo vacio
-		if (tablero [x + i, y + j] == TipoCasilla.sueloVacio)
-			tablero [x + i, y + j] = TipoCasilla.sueloArma;
-		//con nube vacia
-		else if (tablero [x + i, y + j] == TipoCasilla.nubeVacia)
-			tablero [x + i, y + j] = TipoCasilla.nubeArma;
-		//Con nube con sangre
-		else if (tablero [x + i, y + j] == TipoCasilla.nubeSangre)
-			tablero [x + i, y + j] = TipoCasilla.nubeSangreArma;
-		//Con la sangre
-		else if (tablero [x + i, y + j] == TipoCasilla.sangreVacia)
-			tablero [x + i, y + j] = TipoCasilla.sangreArma;
-		//Con el cadaver
-		else if (tablero [x + i, y + j] == TipoCasilla.muertoVacio)
-			tablero [x + i, y + j] = TipoCasilla.muertoArma;
+            switch (caso)
+            {
+                case 0: //ARRIBA
+                    if ( y-2 >=0 && tablero[x, y-2] != TipoCasilla.hueco && tablero[x, y - 2] != TipoCasilla.nubeVacia && tablero[x, y - 2] != TipoCasilla.nubeSangre)
+                    {
+                        tablero[x, y - 2] = TipoCasilla.sueloArma;
+                        //Set de la posición del arma
+                        xArma = x;
+                        yArma = y -2;
+                        ok = true;
+                    }
+                    break;
+
+                case 1: //ABAJO
+                    if (y + 2 < altoTablero && tablero[x, y + 2] != TipoCasilla.hueco && tablero[x, y + 2] != TipoCasilla.nubeVacia && tablero[x, y + 2] != TipoCasilla.nubeSangre)
+                    {
+                        tablero[x, y + 2] = TipoCasilla.sueloArma;
+                        //Set de la posición del arma
+                        xArma = x;
+                        yArma = y +2;
+                        ok = true;
+                    }
+                    break;
+
+                case 2: //IZQUIERDA
+                    if (x - 2 >= 0 && tablero[x - 2, y] != TipoCasilla.hueco && tablero[x - 2, y] != TipoCasilla.nubeVacia && tablero[x - 2, y] != TipoCasilla.nubeSangre)
+                    {
+                        tablero[x -2, y] = TipoCasilla.sueloArma;
+                        //Set de la posición del arma
+                        xArma = x -2;
+                        yArma = y;
+                        ok = true;
+                    }
+                    break;
+
+                case 3: //DERECHO
+                    if (x + 2 < anchoTablero && tablero[x + 2, y ] != TipoCasilla.hueco && tablero[x + 2, y ] != TipoCasilla.nubeVacia && tablero[x + 2, y] != TipoCasilla.nubeSangre)
+                    {
+                        tablero[x + 2, y] = TipoCasilla.sueloArma;
+                        //Set de la posición del arma
+                        xArma = x +2;
+                        yArma = y;
+                        ok = true;
+                    }
+                    break;
+
+                case 4: //DIAGONAL ARRIBA-IZQUIERDA
+                    if (y - 1 >= 0 && x-1 >=0 && tablero[x -1, y - 1] != TipoCasilla.hueco && tablero[x - 1, y - 1] != TipoCasilla.nubeVacia && tablero[x - 1, y - 1] != TipoCasilla.nubeSangre)
+                    {
+                        tablero[x - 1, y - 1] = TipoCasilla.sueloArma;
+                        //Set de la posición del arma
+                        xArma = x -1;
+                        yArma = y -1;
+                        ok = true;
+                    }
+                    break;
+
+                case 5: //DIAGONAL ARIBA DERECHA
+                    if (y - 1 >= 0 && x + 1 < anchoTablero && tablero[x + 1, y - 1] != TipoCasilla.hueco && tablero[x + 1, y - 1] != TipoCasilla.nubeVacia && tablero[x + 1, y - 1] != TipoCasilla.nubeSangre)
+                    {
+                        tablero[x + 1, y - 1] = TipoCasilla.sueloArma;
+                        //Set de la posición del arma
+                        xArma = x +1;
+                        yArma = y -1;
+                        ok = true;
+                    }
+                    break;
+
+                case 6: //DIAGONAL ABAJO IZQUIERDA
+                    if (y + 1 < altoTablero && x - 1 >= 0 && tablero[x - 1, y + 1] != TipoCasilla.hueco && tablero[x - 1, y + 1] != TipoCasilla.nubeVacia && tablero[x - 1, y + 1] != TipoCasilla.nubeSangre)
+                    {
+                        tablero[x - 1, y + 1] = TipoCasilla.sueloArma;
+                        //Set de la posición del arma
+                        xArma = x - 1;
+                        yArma = y + 1;
+                        ok = true;
+                    }
+                    break;
+
+                case 7: //DIAGNAL ABAJO DERECHA
+                    if (y + 1 < altoTablero && x +1 < anchoTablero && tablero[x + 1, y + 1] != TipoCasilla.hueco && tablero[x + 1, y + 1] != TipoCasilla.nubeVacia && tablero[x + 1, y + 1] != TipoCasilla.nubeSangre)
+                    {
+                        tablero[x + 1, y + 1] = TipoCasilla.sueloArma;
+                        //Set de la posición del arma
+                        xArma = x + 1;
+                        yArma = y + 1;
+                        ok = true;
+                    }
+                    break;
+
+              
+            }
+
+
+
+
+        } while (!ok);
+
+	
+	
+		
 
 	}
 
