@@ -12,7 +12,7 @@ public class IAManager : MonoBehaviour {
 
     enum percepcionCasilla {ok, desconocido, nube, riesgo, objetivo}
 
-    enum MovimientoAgente { Arriba, Abajo, Izquierda, Derecha}
+    enum Movimiento { Arriba, Abajo, Izquierda, Derecha}
 
     class CasillaIA
     {
@@ -28,7 +28,8 @@ public class IAManager : MonoBehaviour {
     CasillaIA[,] tableroIA;
     int anchoTablero, altoTablero;          //Los necesito del GameManager
 
-    MovimientoAgente sigMov;
+    Movimiento siguienteMov;
+    modoAgente modo;
 
     //Booleanos de control
     bool muertoEncontrado;
@@ -40,6 +41,8 @@ public class IAManager : MonoBehaviour {
 
         gm.getInfoCasilla(anchoTablero, altoTablero);   //Ahora tenemos los valores :3
         tableroIA = new CasillaIA[anchoTablero, altoTablero];
+
+        modo = modoAgente.Patrullando;
 	}
 	
 	// Update is called once per frame
@@ -56,20 +59,62 @@ public class IAManager : MonoBehaviour {
     ///  Luego, quieres actualizar tu información del tablero con la info que tengas bajo tus pies(incluido si es hueco: te puto mueres), y quizá
     ///         sea bueno hacer estimaciones con diagonales de dónde puede estar un hueco, o un objetivo :3
     /// </summary>
-    void MovimientoAgente()
-    {
+    void MovimientoAgente() {
+        //Tomamos e interpretamos la información de la nueva pos :3
+        switch (modo)
+        {
+            case modoAgente.Patrullando:
+                //Hace un paso de la lógica 
 
+                break;
+
+            case modoAgente.Analizando:
+                //Hace un paso de la lógca de buscar
+                break;
+
+            case modoAgente.Volviendo:
+                //Ejecuta un paso del A* para volver a casa
+                break;
+
+            case modoAgente.Muerto:
+                //Pues te has muerto jajja
+
+                break;
+        }
     }
 
     //Módulo para el estado de patrulla
     void patrulla()
     {
         //Te dan la info. Si ya tienes algo en plan has asumido una nube y la pones a ok, cuando te llegue dicha nube la pondrás a lo que es: una nube.
+        //
+        
     }
 
+
+    //Módulo para la busqueda perimetral 
+    void busca()
+    {
+
+    }
+
+    //Para la vuelta a casa
+    void vueltaACasa()
+    {
+
+    }
+
+
+    //-------------------------------------------------------
+    //METODOS IMPORTANTES (o no)
     //Fragmento que nos permite determinar con lógica guapa guapa dónde están los huecos (y la sangre?)
     //partiendo de las premisas que nos proporcionan los conocimientos que tengamos
     //Premisa: Estas en una casilla con nube.
+    void analizaInfoGM()
+    {
+        //Recibes un int, que representa cierta información del GM que la IA va a interpretar a su manera.
+        int gmInfo = gm.getInfoCasilla();
+    }
     void analizaTerreno(int x, int y)
     {
         //Booleanos de control: para evitar modificar un punto cardinal dos veces
@@ -91,12 +136,12 @@ public class IAManager : MonoBehaviour {
                 if (tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.ok)
                 {
                     tableroIA[x, y - 1].infoCasilla = percepcionCasilla.ok;
-                    norteOk = true; 
+                    norteOk = true;
                 }
-                 //Queremos ver si es nube.
+                //Queremos ver si es nube.
                 else if (tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.riesgo)
                 {
-                    
+
                     tableroIA[x, y - 1].infoCasilla = percepcionCasilla.riesgo;
                 }
             }
@@ -109,10 +154,10 @@ public class IAManager : MonoBehaviour {
                 if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.ok)
                 {
                     tableroIA[x, y - 1].infoCasilla = percepcionCasilla.ok; //Norte es ok
-                    norteOk = true; 
+                    norteOk = true;
                 }
                 //Queremos ver si es nube.
-                else if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x+1,y-1].infoCasilla == percepcionCasilla.riesgo)
+                else if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.riesgo)
                 {
 
                     tableroIA[x, y - 1].infoCasilla = percepcionCasilla.riesgo; //Hay riesgo en norte
@@ -121,7 +166,7 @@ public class IAManager : MonoBehaviour {
             }
 
             //Cuando no puedes determinar por los medios dados la información que contiene, la ponemos a riesgo.
-            else tableroIA[x,y-1].infoCasilla = percepcionCasilla.riesgo;
+            else tableroIA[x, y - 1].infoCasilla = percepcionCasilla.riesgo;
 
         }
 
@@ -173,7 +218,7 @@ public class IAManager : MonoBehaviour {
 
         //--------ESTE------------
         //Si no hemos estado en el este...
-        if (x + 1 < anchoTablero && (tableroIA[x + 1, y].infoCasilla == percepcionCasilla.desconocido || tableroIA[x + 1, y ].infoCasilla == percepcionCasilla.riesgo))
+        if (x + 1 < anchoTablero && (tableroIA[x + 1, y].infoCasilla == percepcionCasilla.desconocido || tableroIA[x + 1, y].infoCasilla == percepcionCasilla.riesgo))
         {
             //Buscamos informacion en las diagonales
             //Diagonal Arriba
@@ -263,18 +308,7 @@ public class IAManager : MonoBehaviour {
 
         }
 
-        
-    }
-
-    //Módulo para la busqueda perimetral 
-    void busca()
-    {
 
     }
 
-    //Para la vuelta a casa
-    void vueltaACasa()
-    {
-
-    }
 }
