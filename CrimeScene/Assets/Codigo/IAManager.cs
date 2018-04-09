@@ -36,6 +36,9 @@ public class IAManager : MonoBehaviour {
     bool armaEncontrada;
     bool paLaCama;              //Determina si, al volver a casa, la partida debe terminar
 
+	//Stack de movimientos
+	Queue <Movimiento> movimientosPlaneados;
+
 	// Use this for initialization
 	void Start () {
 
@@ -67,7 +70,7 @@ public class IAManager : MonoBehaviour {
         {
             case modoAgente.Patrullando:
                 //Hace un paso de la lógica 
-				
+				patrulla();
                 break;
 
             case modoAgente.Analizando:
@@ -98,6 +101,19 @@ public class IAManager : MonoBehaviour {
 		//Si hay desconocida y ok, vas a desconocida. Si hay mas de una desconocida, aleatoria.
 		//Si hay riesgo y desconocida, vas a desconocida.
 
+		if (movimientosPlaneados.Count != 0) {
+			//Haces un pop y se lo mandas al GM(?)
+			//Si sabes que vas hacia un riesgo o una ok, no vayas: pasas a la siguiente.
+			
+		} 
+		else {
+
+			if(
+
+
+
+
+		}
         
     }
 
@@ -106,6 +122,7 @@ public class IAManager : MonoBehaviour {
     void busca()
     {
 		//Podemos establecer una matriz de busqueda.
+					//Aqui va la sangre ;3 
 
     }
 
@@ -132,40 +149,62 @@ public class IAManager : MonoBehaviour {
 
 		switch (gmInfo) {
 
-		case 1: //Casilla vacia -> ok
+		case 0: //Casilla vacia -> ok
 			//Realmente no hace nada
 			break;
 
-		case 2: //Hueco -> te has muerto :3
+		case 1: //Hueco -> te has muerto :3
 			modo = modoAgente.Muerto;
 			break;
 
-		case 3: //sueloVacio -> ok
+		case 2: //sueloVacio -> ok
 			tableroIA[tableroX, tableroY] = percepcionCasilla.ok;
 			break;
 
-		case 4: //sueloArma -> un objetivo completado! :3
+		case 3: //sueloArma -> un objetivo completado! :3
 			armaEncontrada = true;
 			if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
 				paLaCama = true;
 			
 			tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
-
+			//Metes las cuatro direcciones 
+			for (int i = 0; i < 4; i++) {
+				switch (i) {
+					case 0: //norte: ida y vuelta
+								movimientosPlaneados.Enqueue(Movimiento.Arriba);
+								movimientosPlaneados.Enqueue(Movimiento.Abajo);
+						break;
+					case 1: //sur: ida y vuelta
+								movimientosPlaneados.Enqueue(Movimiento.Abajo);
+								movimientosPlaneados.Enqueue(Movimiento.Arriba);
+				  	 	break;
+					case 2: //este: ida y vuelta
+								movimientosPlaneados.Enqueue(Movimiento.Derecha);
+								movimientosPlaneados.Enqueue(Movimiento.Izquierda);
+						break;
+					case 3: //oeste: ida y vuelta
+								movimientosPlaneados.Enqueue(Movimiento.Izquierda);
+								movimientosPlaneados.Enqueue(Movimiento.Derecha);
+						break;
+				
+				}
+			}
+		
+	
 			//Si no estabas en busca, te pones a ello.
-			if (modo != modoAgente.Analizando)
-				modo = modoAgente.Analizando;
-			else if (modo == modoAgente.Analizando && paLaCama)
+			
+			if (modo == modoAgente.Analizando && paLaCama)
 				modo = modoAgente.Volviendo;
 			
 			break;
 		
-		case 5: //NubeVacia -> pones a nube y miras alrededores
+		case 4: //NubeVacia -> pones a nube y miras alrededores
 			tableroIA [tableroX, tableroY] = percepcionCasilla.nube;
 			analizaTerreno (tableroX, tableroY);
 			
 			break;
 
-		case 6: //NubeSangre -> Cambias a busqueda (y miras alrededores antes?)
+		case 5: //NubeSangre -> Cambias a busqueda (y miras alrededores antes?)
 			tableroIA [tableroX, tableroY] = percepcionCasilla.nube;
 			analizaTerreno (tableroX, tableroY);
 
@@ -175,14 +214,14 @@ public class IAManager : MonoBehaviour {
 				modo = modoAgente.Analizando;
 			break;
 
-		case 7: //sangre -> cambias a busqueda. Si ya estás en busqueda, supongo que actuaizas mapa y ya.
+		case 6: //sangre -> cambias a busqueda. Si ya estás en busqueda, supongo que actuaizas mapa y ya.
 			tableroIA [tableroX, tableroY] = percepcionCasilla.sangre;
 
 			if (modo != modoAgente.Analizando)
 				modo = modoAgente.Analizando;
 			break;
 
-		case 8: //muerto -> yay, otro objetivo! 
+		case 7: //muerto -> yay, otro objetivo! 
 			muertoEncontrado = true;
 			if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
 				paLaCama = true;
@@ -192,7 +231,7 @@ public class IAManager : MonoBehaviour {
 
 			break;
 
-		case 9: //Casa -> si tienes los dos objetivos, has ganado. Si no, no.
+		case 8: //Casa -> si tienes los dos objetivos, has ganado. Si no, no.
 			if (paLaCama) {
 				//HAS GANADO :333
 			}

@@ -2,15 +2,8 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Codigo\IAManager.cs">
     <Files>
-      <File FileName="Assets\Codigo\IAManager.cs" Line="93" Column="31" NotebookId="1" />
+      <File FileName="Assets\Codigo\IAManager.cs" Line="159" Column="7" />
     </Files>
-    <FloatingWindows>
-      <FloatingWindow WindowId="1" X="-8" Y="-8" Width="1920" Height="1018">
-        <Files>
-          <File FileName="Assets\Codigo\GameManager.cs" Line="108" Column="12" />
-        </Files>
-      </FloatingWindow>
-    </FloatingWindows>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
