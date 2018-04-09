@@ -10,7 +10,7 @@ public class IAManager : MonoBehaviour {
 
     enum modoAgente {Patrullando, Analizando, Volviendo, Muerto}
 
-    enum percepcionCasilla {ok, desconocido, nube, riesgo, objetivo}
+    enum percepcionCasilla {ok, desconocido, nube, sangre, riesgo, objetivo}
 
     enum Movimiento { Arriba, Abajo, Izquierda, Derecha}
 
@@ -61,11 +61,13 @@ public class IAManager : MonoBehaviour {
     /// </summary>
     void MovimientoAgente() {
         //Tomamos e interpretamos la información de la nueva pos :3
+		analizaInfoGM();
+
         switch (modo)
         {
             case modoAgente.Patrullando:
                 //Hace un paso de la lógica 
-
+				
                 break;
 
             case modoAgente.Analizando:
@@ -86,8 +88,16 @@ public class IAManager : MonoBehaviour {
     //Módulo para el estado de patrulla
     void patrulla()
     {
-        //Te dan la info. Si ya tienes algo en plan has asumido una nube y la pones a ok, cuando te llegue dicha nube la pondrás a lo que es: una nube.
-        //
+        //lA PATRULLA funciona de la sigiente forma:
+		// Si encuentras el arma, pones una cola con direcciones fijas que hacer. Las siguientes iteraciones usarán esos movimientos
+		//Que prevalecen sobre todo.
+		// Si hay una desconocida, se mueve ahí.
+		// Si no hay desconocidas, de mueve a las de riesgo. (Necesidad)
+		// Si TODAS son ok, seleccionas una aleatoria
+
+		//Si hay desconocida y ok, vas a desconocida. Si hay mas de una desconocida, aleatoria.
+		//Si hay riesgo y desconocida, vas a desconocida.
+
         
     }
 
@@ -95,6 +105,7 @@ public class IAManager : MonoBehaviour {
     //Módulo para la busqueda perimetral 
     void busca()
     {
+		//Podemos establecer una matriz de busqueda.
 
     }
 
@@ -113,7 +124,84 @@ public class IAManager : MonoBehaviour {
     void analizaInfoGM()
     {
         //Recibes un int, que representa cierta información del GM que la IA va a interpretar a su manera.
-        int gmInfo = gm.getInfoCasilla();
+		int tableroX, tableroY;
+        int gmInfo = gm.getInfoCasilla(tableroX, tableroY);
+
+		//Ahora con un switch vamos a interpretarlo y en funcion de eso modificar
+		//tanto la informacion local del tablero como el modo
+
+		switch (gmInfo) {
+
+		case 1: //Casilla vacia -> ok
+			//Realmente no hace nada
+			break;
+
+		case 2: //Hueco -> te has muerto :3
+			modo = modoAgente.Muerto;
+			break;
+
+		case 3: //sueloVacio -> ok
+			tableroIA[tableroX, tableroY] = percepcionCasilla.ok;
+			break;
+
+		case 4: //sueloArma -> un objetivo completado! :3
+			armaEncontrada = true;
+			if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
+				paLaCama = true;
+			
+			tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
+
+			//Si no estabas en busca, te pones a ello.
+			if (modo != modoAgente.Analizando)
+				modo = modoAgente.Analizando;
+			else if (modo == modoAgente.Analizando && paLaCama)
+				modo = modoAgente.Volviendo;
+			
+			break;
+		
+		case 5: //NubeVacia -> pones a nube y miras alrededores
+			tableroIA [tableroX, tableroY] = percepcionCasilla.nube;
+			analizaTerreno (tableroX, tableroY);
+			
+			break;
+
+		case 6: //NubeSangre -> Cambias a busqueda (y miras alrededores antes?)
+			tableroIA [tableroX, tableroY] = percepcionCasilla.nube;
+			analizaTerreno (tableroX, tableroY);
+
+			//tableroIA [tableroX, tableroY] = percepcionCasilla.sangre; //Tambien es sangre :3
+
+			if (modo != modoAgente.Analizando)
+				modo = modoAgente.Analizando;
+			break;
+
+		case 7: //sangre -> cambias a busqueda. Si ya estás en busqueda, supongo que actuaizas mapa y ya.
+			tableroIA [tableroX, tableroY] = percepcionCasilla.sangre;
+
+			if (modo != modoAgente.Analizando)
+				modo = modoAgente.Analizando;
+			break;
+
+		case 8: //muerto -> yay, otro objetivo! 
+			muertoEncontrado = true;
+			if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
+				paLaCama = true;
+
+			tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
+
+
+			break;
+
+		case 9: //Casa -> si tienes los dos objetivos, has ganado. Si no, no.
+			if (paLaCama) {
+				//HAS GANADO :333
+			}
+				
+			tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
+			break;
+
+
+		}
     }
     void analizaTerreno(int x, int y)
     {

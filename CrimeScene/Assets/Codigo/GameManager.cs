@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour {
 	int xArma, yArma;
 	int xMuerto, yMuerto;
 	int xCasa, yCasa;
+	int xJugador, yJugador;
 
 	//SUper enumerado de estados de juego :3
 	public enum TipoCasilla {
@@ -62,9 +63,12 @@ public class GameManager : MonoBehaviour {
     ///////////////////////////////////////
     //__MÉTODOS DE COMUNICACION CON IA___//
     ///////////////////////////////////////
-    public int getInfoCasilla(int x, int y)
+	public int getInfoCasilla(out int x, out int y)
     {
-        return (int)tablero[x, y];
+		x = xJugador;
+		y = yJugador;
+        return (int)tablero[xJugador, yJugador];
+
     }
 
     public void retiraGameObject(string obj)
@@ -198,6 +202,9 @@ public class GameManager : MonoBehaviour {
 		tablero [x, y] = TipoCasilla.casa;
 		xCasa = x;
 		yCasa = y;
+
+		xJugador = x;
+		yJugador = y;
 		
 	}
 
