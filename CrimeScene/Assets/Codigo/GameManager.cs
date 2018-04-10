@@ -5,26 +5,33 @@ using UnityEngine;
 public class GameManager : MonoBehaviour {
 
 	public static GameManager instance;
-
+    
 	//Public GameObject
 	public GameObject suelo; 		 
 	public GameObject nube;	 		  
 	public GameObject hueco; 		
 	public GameObject sangre;		
 	public GameObject nubeSangre;    
-	public GameObject casa;			
+	public GameObject casa;
+
+    public GameObject IAMan;
 
 	//Agentes de la escena del crimen
 	public GameObject agente;		
 	public GameObject muerto;		
 	public GameObject arma;
 
+    //Bool de fin
+    bool PuzzleCompletado;
+    bool AgenteMuerto;
+
+    //Variables que necesitamos guardar
 	int xArma, yArma;
 	int xMuerto, yMuerto;
 	int xCasa, yCasa;
 	int xJugador, yJugador;
 
-	//SUper enumerado de estados de juego :3
+	//Super enumerado de estados de casilla
 	public enum TipoCasilla {
 		vacio,
 		hueco, sueloVacio, sueloArma, 
@@ -74,8 +81,46 @@ public class GameManager : MonoBehaviour {
 	/// 3 -> Oeste
 	/// 4 -> Volviendo a casa: Paso de la IA.
 	public void EjecutaIA(){
-		
+        if (!PuzzleCompletado || !AgenteMuerto)
+        {
+            int nuevoMovimiento = IAMan.GetComponent<IAManager>().MovimientoAgente();
+            switch (nuevoMovimiento)
+            {
+                case -1: //Se ha muerto.
+                    AgenteMuerto = true;
+                    break;
+
+                case 0: //Se mueve al norte.
+                    yJugador--;
+                    agente.transform.Translate(0, +1, 0); //En coordenadas de Unity va al reves
+                    break;
+
+                case 1: //Se mueve al sur.
+                    yJugador++;
+                    agente.transform.Translate(0, -1, 0);
+                    break;
+
+                case 2: //Se mueve al este.
+                    xJugador++;
+                    agente.transform.Translate (+1, 0, 0);
+                    break;
+
+                case 3: //Se mueve al oeste.
+                    xJugador--;
+                    agente.transform.Translate(-1, 0, 0);
+                    break;
+
+                default:
+                    break;
+            }
+        }
 	}
+
+   
+    public void IACompletedPuzzle()
+    {
+        PuzzleCompletado = true;
+    }
 
 	public int getInfoCasilla(out int x, out int y)
     {
@@ -97,7 +142,7 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    void getDimensiones(out int alto, out int ancho) {
+    public void getDimensiones(out int alto, out int ancho) {
         alto = altoTablero;
         ancho = anchoTablero;
     }
@@ -261,12 +306,11 @@ public class GameManager : MonoBehaviour {
 
 	}
 
-	//Se asume que la sangre no va a caer por un hueco
 	void creaSangre(int x, int y){
 
 		//Norte
-		if (y - 1 >= 0) {
-			if(tablero [x, y - 1] != TipoCasilla.nubeVacia)
+		if (y - 1 >= 0 && tablero[x, y - 1] != TipoCasilla.hueco) {
+			if(tablero [x, y - 1] != TipoCasilla.nubeVacia )
 				tablero [x, y - 1] = TipoCasilla.sangre;
 				
 			else tablero [x, y - 1] = TipoCasilla.nubeSangre;
@@ -274,7 +318,7 @@ public class GameManager : MonoBehaviour {
 	
 
 		//Sur
-		if (y + 1 < altoTablero) {
+		if (y + 1 < altoTablero && tablero[x, y + 1] != TipoCasilla.hueco) {
 			if(tablero [x, y + 1] != TipoCasilla.nubeVacia)
 				tablero [x, y + 1] = TipoCasilla.sangre;
 			
@@ -283,23 +327,26 @@ public class GameManager : MonoBehaviour {
 
 
 		//Izquierda
-		if (x - 1 >= 0) {
-			if( tablero [x - 1, y] != TipoCasilla.nubeVacia)
+		if (x - 1 >= 0 && tablero[x - 1, y] != TipoCasilla.hueco) {
+			if( tablero [x - 1, y] != TipoCasilla.nubeVacia )
 				tablero [x-1, y] = TipoCasilla.sangre;
 
 			else tablero [x-1, y] = TipoCasilla.nubeSangre;
 		}
 
 
-		//Derecha
-		if (x + 1 < anchoTablero) {
-			if(tablero [x + 1, y] != TipoCasilla.nubeVacia)
-				tablero [x + 1, y] = TipoCasilla.sangre;
-			
-			else tablero [x+ 1, y ] = TipoCasilla.nubeSangre;
-		}
+        //Derecha
+        if (x + 1 < anchoTablero && tablero[x + 1, y] != TipoCasilla.hueco)
+        {
+
+            if (tablero[x + 1, y] != TipoCasilla.nubeVacia)
+                tablero[x + 1, y] = TipoCasilla.sangre;
+
+            else tablero[x + 1, y] = TipoCasilla.nubeSangre;
+        }
 
 	}
+
 
 	void ponArma(int x, int y){
         int caso;

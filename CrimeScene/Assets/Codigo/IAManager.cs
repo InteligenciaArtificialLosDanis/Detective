@@ -12,18 +12,10 @@ public class IAManager : MonoBehaviour {
 
     enum Movimiento { Arriba, Abajo, Izquierda, Derecha}
 
-    class CasillaIA
-    {
-       public CasillaIA (percepcionCasilla percepcion)
-        {
-            infoCasilla = percepcion;
-        }
-
-        public percepcionCasilla infoCasilla;
-    }
+    
 
     //Tableros de información de la IA
-    CasillaIA[,] tableroIA;
+    percepcionCasilla [,] tableroIA;
     int anchoTablero, altoTablero;          //Los necesito del GameManager
 
 	int tableroX, tableroY;
@@ -44,8 +36,12 @@ public class IAManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		GameManager.instance.getInfoCasilla( out anchoTablero, out altoTablero);   //Ahora tenemos los valores :3
-        tableroIA = new CasillaIA[anchoTablero, altoTablero];
+        anchoTablero = 10;
+        altoTablero = 5;
+        tableroIA = new percepcionCasilla[anchoTablero, altoTablero];
+
+        //Para la patrulla
+        movimientosPlaneados = new Queue<Movimiento>(8);
 
         modo = modoAgente.Patrullando;
 	}
@@ -124,22 +120,22 @@ public class IAManager : MonoBehaviour {
 				switch (i) {
 				case 0: //norte
 					if (tableroY - 1 >= 0)
-						alrededores[i] = tableroIA [tableroX, tableroY - 1].infoCasilla;
+						alrededores[i] = tableroIA [tableroX, tableroY - 1];
 					break;
 
 				case 1: //sur
 					if (tableroY + 1 < altoTablero)
-						alrededores[i] = tableroIA [tableroX, tableroY + 1].infoCasilla;
+						alrededores[i] = tableroIA [tableroX, tableroY + 1];
 					break;
 
 				case 2: //este
 					if (tableroX + 1 < anchoTablero)
-						alrededores[i] = tableroIA [tableroX + 1, tableroY].infoCasilla;
+						alrededores[i] = tableroIA [tableroX + 1, tableroY];
 					break;
 
 				case 3: //oeste
 					if (tableroX - 1 >= 0)
-						alrededores[i] = tableroIA [tableroX -1, tableroY].infoCasilla;
+						alrededores[i] = tableroIA [tableroX -1, tableroY];
 					break;
 
 				}
@@ -169,8 +165,9 @@ public class IAManager : MonoBehaviour {
     //Módulo para la busqueda perimetral 
     int busca()
     {
-		//Podemos establecer una matriz de busqueda.
-					//Aqui va la sangre ;3 
+        //Podemos establecer una matriz de busqueda.
+        //Aqui va la sangre ;3 
+        GameManager.instance.IACompletedPuzzle(); //TEST
 		return 666;
 
     }
@@ -198,96 +195,117 @@ public class IAManager : MonoBehaviour {
 
 		switch (gmInfo) {
 
-		case 0: //Casilla vacia -> ok
-			//Realmente no hace nada
-			break;
+		    case 0: //Casilla vacia -> ok
+			    //Realmente no hace nada
+			    break;
 
-		case 1: //Hueco -> te has muerto :3
-			modo = modoAgente.Muerto;
-			break;
+		    case 1: //Hueco -> te has muerto :3
+			    modo = modoAgente.Muerto;
+			    break;
 
-		case 2: //sueloVacio -> ok
+		    case 2: //sueloVacio -> ok
 			
-			tableroIA[tableroX, tableroY] = percepcionCasilla.ok;
-			break;
+			    tableroIA[tableroX, tableroY] = percepcionCasilla.ok;
+			    break;
 
-		case 3: //sueloArma -> un objetivo completado! :3
-			armaEncontrada = true;
-			if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
-				paLaCama = true;
+		    case 3: //sueloArma -> un objetivo completado! :3
+			    armaEncontrada = true;
+			    if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
+				    paLaCama = true;
 			
-			tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
-			//Metes las cuatro direcciones 
-			for (int i = 0; i < 4; i++) {
-				switch (i) {
-					case 0: //norte: ida y vuelta
-								movimientosPlaneados.Enqueue(Movimiento.Arriba);
-								movimientosPlaneados.Enqueue(Movimiento.Abajo);
-						break;
-					case 1: //sur: ida y vuelta
-								movimientosPlaneados.Enqueue(Movimiento.Abajo);
-								movimientosPlaneados.Enqueue(Movimiento.Arriba);
-				  	 	break;
-					case 2: //este: ida y vuelta
-								movimientosPlaneados.Enqueue(Movimiento.Derecha);
-								movimientosPlaneados.Enqueue(Movimiento.Izquierda);
-						break;
-					case 3: //oeste: ida y vuelta
-								movimientosPlaneados.Enqueue(Movimiento.Izquierda);
-								movimientosPlaneados.Enqueue(Movimiento.Derecha);
-						break;
+			    tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
+			    //Metes las cuatro direcciones 
+			    for (int i = 0; i < 4; i++) {
+				    switch (i) {
+					    case 0: //norte: ida y vuelta
+								    movimientosPlaneados.Enqueue(Movimiento.Arriba);
+								    movimientosPlaneados.Enqueue(Movimiento.Abajo);
+						    break;
+					    case 1: //sur: ida y vuelta
+								    movimientosPlaneados.Enqueue(Movimiento.Abajo);
+								    movimientosPlaneados.Enqueue(Movimiento.Arriba);
+				  	 	    break;
+					    case 2: //este: ida y vuelta
+								    movimientosPlaneados.Enqueue(Movimiento.Derecha);
+								    movimientosPlaneados.Enqueue(Movimiento.Izquierda);
+						    break;
+					    case 3: //oeste: ida y vuelta
+								    movimientosPlaneados.Enqueue(Movimiento.Izquierda);
+								    movimientosPlaneados.Enqueue(Movimiento.Derecha);
+						    break;
 				
-				}
-			}
+				    }
+			    }
 		
 	
-			//Si no estabas en busca, te pones a ello.
+			    //Si no estabas en busca, te pones a ello.
 			
-			if (modo == modoAgente.Analizando && paLaCama)
-				modo = modoAgente.Volviendo;
+			    if (modo == modoAgente.Analizando && paLaCama)
+				    modo = modoAgente.Volviendo;
 			
-			break;
+			    break;
 		
-		case 4: //NubeVacia -> pones a nube y miras alrededores
-			tableroIA [tableroX, tableroY] = percepcionCasilla.nube;
-			analizaTerreno (tableroX, tableroY);
+		    case 4: //NubeVacia -> pones a nube y miras alrededores
+			    tableroIA [tableroX, tableroY] = percepcionCasilla.nube;
+			    analizaTerreno (tableroX, tableroY);
 			
-			break;
+			    break;
 
-		case 5: //NubeSangre -> Cambias a busqueda (y miras alrededores antes?)
-			tableroIA [tableroX, tableroY] = percepcionCasilla.nube;
-			analizaTerreno (tableroX, tableroY);
+		    case 5: //NubeSangre -> Cambias a busqueda (y miras alrededores antes?)
+			    tableroIA [tableroX, tableroY] = percepcionCasilla.nube;
+			    analizaTerreno (tableroX, tableroY);
 
-			//tableroIA [tableroX, tableroY] = percepcionCasilla.sangre; //Tambien es sangre :3
+			    //tableroIA [tableroX, tableroY] = percepcionCasilla.sangre; //Tambien es sangre :3
 
-			if (modo != modoAgente.Analizando)
-				modo = modoAgente.Analizando;
-			break;
+			    if (modo != modoAgente.Analizando)
+				    modo = modoAgente.Analizando;
+			    break;
 
-		case 6: //sangre -> cambias a busqueda. Si ya estás en busqueda, supongo que actuaizas mapa y ya.
-			tableroIA [tableroX, tableroY] = percepcionCasilla.sangre;
+              case 6: //NubeArma
+                    armaEncontrada = true;
+                    if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
+                        paLaCama = true;
 
-			if (modo != modoAgente.Analizando)
-				modo = modoAgente.Analizando;
-			break;
+                    tableroIA[tableroX, tableroY] = percepcionCasilla.nube;
+                    analizaTerreno(tableroX, tableroY);
 
-		case 7: //muerto -> yay, otro objetivo! 
-			muertoEncontrado = true;
-			if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
-				paLaCama = true;
+                    break;
+             case 7:
+                    muertoEncontrado = true;
+                    if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
+                        paLaCama = true;
 
-			tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
+                    tableroIA[tableroX, tableroY] = percepcionCasilla.nube;
+                    analizaTerreno(tableroX, tableroY);
+
+                    break;
+         
+
+		    case 8: //sangre -> cambias a busqueda. Si ya estás en busqueda, supongo que actuaizas mapa y ya.
+			    tableroIA [tableroX, tableroY] = percepcionCasilla.sangre;
+
+			    if (modo != modoAgente.Analizando)
+				    modo = modoAgente.Analizando;
+			    break;
+
+		    case 9: //muerto -> yay, otro objetivo! 
+			    muertoEncontrado = true;
+			    if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
+				    paLaCama = true;
+
+			    tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
 
 
-			break;
+			    break;
 
-		case 8: //Casa -> si tienes los dos objetivos, has ganado. Si no, no.
-			if (paLaCama) {
-				//HAS GANADO :333
-			}
+		    case 10: //Casa -> si tienes los dos objetivos, has ganado. Si no, no.
+			    if (paLaCama) {
+                        //HAS GANADO :333
+                        GameManager.instance.IACompletedPuzzle();
+			    }
 				
-			tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
-			break;
+			    tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
+			    break;
 
 
 		}
@@ -303,185 +321,185 @@ public class IAManager : MonoBehaviour {
 
         //--------NORTE------------
         //Si no hemos estado en el norte...
-        if (y - 1 >= 0 && (tableroIA[x, y - 1].infoCasilla == percepcionCasilla.desconocido || tableroIA[x, y - 1].infoCasilla == percepcionCasilla.riesgo))
+        if (y - 1 >= 0 && (tableroIA[x, y - 1] == percepcionCasilla.desconocido || tableroIA[x, y - 1] == percepcionCasilla.riesgo))
         {
             //Buscamos informacion en las diagonales
             //Diagonal Izq
-            if (x - 1 >= 0 && y - 1 >= 0 && tableroIA[x - 1, y - 1].infoCasilla != percepcionCasilla.desconocido && !norteOk)
+            if (x - 1 >= 0 && y - 1 >= 0 && tableroIA[x - 1, y - 1] != percepcionCasilla.desconocido && !norteOk)
             {
                 //Queremos ver si es: ok
-                if (tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.ok)
+                if (tableroIA[x - 1, y - 1] == percepcionCasilla.ok)
                 {
-                    tableroIA[x, y - 1].infoCasilla = percepcionCasilla.ok;
+                    tableroIA[x, y - 1] = percepcionCasilla.ok;
                     norteOk = true;
                 }
                 //Queremos ver si es nube.
-                else if (tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.riesgo)
+                else if (tableroIA[x - 1, y - 1] == percepcionCasilla.nube || tableroIA[x - 1, y - 1] == percepcionCasilla.riesgo)
                 {
 
-                    tableroIA[x, y - 1].infoCasilla = percepcionCasilla.riesgo;
+                    tableroIA[x, y - 1] = percepcionCasilla.riesgo;
                 }
             }
 
 
             //Diagonal Derecha
-            else if (x + 1 < anchoTablero && y - 1 >= 0 && tableroIA[x + 1, y - 1].infoCasilla != percepcionCasilla.desconocido && !norteOk)
+            else if (x + 1 < anchoTablero && y - 1 >= 0 && tableroIA[x + 1, y - 1] != percepcionCasilla.desconocido && !norteOk)
             {
                 //Queremos ver si es: ok
-                if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.ok)
+                if (tableroIA[x + 1, y - 1] == percepcionCasilla.ok)
                 {
-                    tableroIA[x, y - 1].infoCasilla = percepcionCasilla.ok; //Norte es ok
+                    tableroIA[x, y - 1] = percepcionCasilla.ok; //Norte es ok
                     norteOk = true;
                 }
                 //Queremos ver si es nube.
-                else if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.riesgo)
+                else if (tableroIA[x + 1, y - 1] == percepcionCasilla.nube || tableroIA[x + 1, y - 1] == percepcionCasilla.riesgo)
                 {
 
-                    tableroIA[x, y - 1].infoCasilla = percepcionCasilla.riesgo; //Hay riesgo en norte
+                    tableroIA[x, y - 1] = percepcionCasilla.riesgo; //Hay riesgo en norte
                 }
 
             }
 
             //Cuando no puedes determinar por los medios dados la información que contiene, la ponemos a riesgo.
-            else tableroIA[x, y - 1].infoCasilla = percepcionCasilla.riesgo;
+            else tableroIA[x, y - 1] = percepcionCasilla.riesgo;
 
         }
 
         //--------SUR------------
         //Si no hemos estado en el sur...
-        if (y + 1 < altoTablero && (tableroIA[x, y + 1].infoCasilla == percepcionCasilla.desconocido || tableroIA[x, y + 1].infoCasilla == percepcionCasilla.riesgo))
+        if (y + 1 < altoTablero && (tableroIA[x, y + 1] == percepcionCasilla.desconocido || tableroIA[x, y + 1] == percepcionCasilla.riesgo))
         {
             //Buscamos informacion en las diagonales
             //Diagonal Izq
-            if (x - 1 >= 0 && y + 1 < altoTablero && tableroIA[x - 1, y + 1].infoCasilla != percepcionCasilla.desconocido && !surOk)
+            if (x - 1 >= 0 && y + 1 < altoTablero && tableroIA[x - 1, y + 1] != percepcionCasilla.desconocido && !surOk)
             {
                 //Queremos ver si es: ok
-                if (tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.ok)
+                if (tableroIA[x - 1, y + 1] == percepcionCasilla.ok)
                 {
-                    tableroIA[x, y + 1].infoCasilla = percepcionCasilla.ok;
+                    tableroIA[x, y + 1] = percepcionCasilla.ok;
                     surOk = true;
                 }
                 //Queremos ver si es nube.
-                else if (tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.nube || tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.riesgo)
+                else if (tableroIA[x - 1, y + 1] == percepcionCasilla.nube || tableroIA[x - 1, y + 1] == percepcionCasilla.riesgo)
                 {
 
-                    tableroIA[x, y + 1].infoCasilla = percepcionCasilla.riesgo;
+                    tableroIA[x, y + 1] = percepcionCasilla.riesgo;
                 }
             }
 
 
             //Diagonal Derecha
-            else if (x + 1 < anchoTablero && y + 1 < altoTablero && tableroIA[x + 1, y + 1].infoCasilla != percepcionCasilla.desconocido && !surOk)
+            else if (x + 1 < anchoTablero && y + 1 < altoTablero && tableroIA[x + 1, y + 1] != percepcionCasilla.desconocido && !surOk)
             {
                 //Queremos ver si es: ok
-                if (tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.ok)
+                if (tableroIA[x + 1, y + 1] == percepcionCasilla.ok)
                 {
-                    tableroIA[x, y + 1].infoCasilla = percepcionCasilla.ok; //Sur es ok
+                    tableroIA[x, y + 1] = percepcionCasilla.ok; //Sur es ok
                     surOk = true;
                 }
                 //Queremos ver si es nube.
-                else if (tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.nube || tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.riesgo)
+                else if (tableroIA[x + 1, y + 1] == percepcionCasilla.nube || tableroIA[x + 1, y + 1] == percepcionCasilla.riesgo)
                 {
 
-                    tableroIA[x, y + 1].infoCasilla = percepcionCasilla.riesgo; //Hay riesgo en sur
+                    tableroIA[x, y + 1] = percepcionCasilla.riesgo; //Hay riesgo en sur
                 }
 
             }
 
             //Cuando no puedes determinar por los medios dados la información que contiene, la ponemos a riesgo.
-            else tableroIA[x, y + 1].infoCasilla = percepcionCasilla.riesgo;
+            else tableroIA[x, y + 1] = percepcionCasilla.riesgo;
 
         }
 
         //--------ESTE------------
         //Si no hemos estado en el este...
-        if (x + 1 < anchoTablero && (tableroIA[x + 1, y].infoCasilla == percepcionCasilla.desconocido || tableroIA[x + 1, y].infoCasilla == percepcionCasilla.riesgo))
+        if (x + 1 < anchoTablero && (tableroIA[x + 1, y] == percepcionCasilla.desconocido || tableroIA[x + 1, y] == percepcionCasilla.riesgo))
         {
             //Buscamos informacion en las diagonales
             //Diagonal Arriba
-            if (x + 1 < anchoTablero && y - 1 >= 0 && tableroIA[x + 1, y - 1].infoCasilla != percepcionCasilla.desconocido && !esteOk)
+            if (x + 1 < anchoTablero && y - 1 >= 0 && tableroIA[x + 1, y - 1] != percepcionCasilla.desconocido && !esteOk)
             {
                 //Queremos ver si es: ok
-                if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.ok)
+                if (tableroIA[x + 1, y - 1] == percepcionCasilla.ok)
                 {
-                    tableroIA[x + 1, y].infoCasilla = percepcionCasilla.ok;
+                    tableroIA[x + 1, y] = percepcionCasilla.ok;
                     esteOk = true;
                 }
                 //Queremos ver si es nube.
-                else if (tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x + 1, y - 1].infoCasilla == percepcionCasilla.riesgo)
+                else if (tableroIA[x + 1, y - 1] == percepcionCasilla.nube || tableroIA[x + 1, y - 1] == percepcionCasilla.riesgo)
                 {
 
-                    tableroIA[x + 1, y].infoCasilla = percepcionCasilla.riesgo;
+                    tableroIA[x + 1, y] = percepcionCasilla.riesgo;
                 }
             }
 
 
             //Diagonal Abajo
-            else if (x + 1 < anchoTablero && y + 1 < altoTablero && tableroIA[x + 1, y + 1].infoCasilla != percepcionCasilla.desconocido && !esteOk)
+            else if (x + 1 < anchoTablero && y + 1 < altoTablero && tableroIA[x + 1, y + 1] != percepcionCasilla.desconocido && !esteOk)
             {
                 //Queremos ver si es: ok
-                if (tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.ok)
+                if (tableroIA[x + 1, y + 1] == percepcionCasilla.ok)
                 {
-                    tableroIA[x + 1, y].infoCasilla = percepcionCasilla.ok; //Este es ok
+                    tableroIA[x + 1, y] = percepcionCasilla.ok; //Este es ok
                     esteOk = true;
                 }
                 //Queremos ver si es nube.
-                else if (tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.nube || tableroIA[x + 1, y + 1].infoCasilla == percepcionCasilla.riesgo)
+                else if (tableroIA[x + 1, y + 1] == percepcionCasilla.nube || tableroIA[x + 1, y + 1] == percepcionCasilla.riesgo)
                 {
 
-                    tableroIA[x + 1, y].infoCasilla = percepcionCasilla.riesgo; //Hay riesgo en este
+                    tableroIA[x + 1, y] = percepcionCasilla.riesgo; //Hay riesgo en este
                 }
 
             }
 
             //Cuando no puedes determinar por los medios dados la información que contiene, la ponemos a riesgo.
-            else tableroIA[x, y - 1].infoCasilla = percepcionCasilla.riesgo;
+            else tableroIA[x, y - 1] = percepcionCasilla.riesgo;
 
         }
 
         //--------OESTE------------
         //Si no hemos estado en el oeste...
-        if (x - 1 < anchoTablero && (tableroIA[x - 1, y].infoCasilla == percepcionCasilla.desconocido || tableroIA[x - 1, y].infoCasilla == percepcionCasilla.riesgo))
+        if (x - 1 < anchoTablero && (tableroIA[x - 1, y] == percepcionCasilla.desconocido || tableroIA[x - 1, y] == percepcionCasilla.riesgo))
         {
             //Buscamos informacion en las diagonales
             //Diagonal Arriba
-            if (x - 1 >= 0 && y - 1 >= 0 && tableroIA[x - 1, y - 1].infoCasilla != percepcionCasilla.desconocido && !oesteOk)
+            if (x - 1 >= 0 && y - 1 >= 0 && tableroIA[x - 1, y - 1] != percepcionCasilla.desconocido && !oesteOk)
             {
                 //Queremos ver si es: ok
-                if (tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.ok)
+                if (tableroIA[x - 1, y - 1] == percepcionCasilla.ok)
                 {
-                    tableroIA[x - 1, y].infoCasilla = percepcionCasilla.ok;
+                    tableroIA[x - 1, y] = percepcionCasilla.ok;
                     oesteOk = true;
                 }
                 //Queremos ver si es nube.
-                else if (tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.nube || tableroIA[x - 1, y - 1].infoCasilla == percepcionCasilla.riesgo)
+                else if (tableroIA[x - 1, y - 1] == percepcionCasilla.nube || tableroIA[x - 1, y - 1] == percepcionCasilla.riesgo)
                 {
 
-                    tableroIA[x - 1, y].infoCasilla = percepcionCasilla.riesgo;
+                    tableroIA[x - 1, y] = percepcionCasilla.riesgo;
                 }
             }
 
 
             //Diagonal Abajo
-            else if (x - 1 >= 0 && y + 1 < altoTablero && tableroIA[x - 1, y + 1].infoCasilla != percepcionCasilla.desconocido && !oesteOk)
+            else if (x - 1 >= 0 && y + 1 < altoTablero && tableroIA[x - 1, y + 1] != percepcionCasilla.desconocido && !oesteOk)
             {
                 //Queremos ver si es: ok
-                if (tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.ok)
+                if (tableroIA[x - 1, y + 1] == percepcionCasilla.ok)
                 {
-                    tableroIA[x - 1, y].infoCasilla = percepcionCasilla.ok; //Oeste es ok
+                    tableroIA[x - 1, y] = percepcionCasilla.ok; //Oeste es ok
                     oesteOk = true;
                 }
                 //Queremos ver si es nube.
-                else if (tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.nube || tableroIA[x - 1, y + 1].infoCasilla == percepcionCasilla.riesgo)
+                else if (tableroIA[x - 1, y + 1] == percepcionCasilla.nube || tableroIA[x - 1, y + 1] == percepcionCasilla.riesgo)
                 {
 
-                    tableroIA[x - 1, y].infoCasilla = percepcionCasilla.riesgo; //Hay riesgo en oeste
+                    tableroIA[x - 1, y] = percepcionCasilla.riesgo; //Hay riesgo en oeste
                 }
 
             }
 
             //Cuando no puedes determinar por los medios dados la información que contiene, la ponemos a riesgo.
-            else tableroIA[x - 1, y].infoCasilla = percepcionCasilla.riesgo;
+            else tableroIA[x - 1, y] = percepcionCasilla.riesgo;
 
         }
 
