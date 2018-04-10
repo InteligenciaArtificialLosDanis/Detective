@@ -6,8 +6,6 @@ public class IAManager : MonoBehaviour {
 
     //La IA consiste en un recorrido a ciegas hasta que llega a la sangre y cambia de modo
 
-    public GameManager gm;
-
     enum modoAgente {Patrullando, Analizando, Volviendo, Muerto}
 
     enum percepcionCasilla {ok, desconocido, nube, sangre, riesgo, objetivo}
@@ -28,6 +26,8 @@ public class IAManager : MonoBehaviour {
     CasillaIA[,] tableroIA;
     int anchoTablero, altoTablero;          //Los necesito del GameManager
 
+	int tableroX, tableroY;
+
     Movimiento siguienteMov;
     modoAgente modo;
 
@@ -39,10 +39,12 @@ public class IAManager : MonoBehaviour {
 	//Stack de movimientos
 	Queue <Movimiento> movimientosPlaneados;
 
+	percepcionCasilla [] alrededores = new percepcionCasilla[4]; //Array con la información de lo que rodea al personaje (del tablero de la IA)
+
 	// Use this for initialization
 	void Start () {
 
-        gm.getInfoCasilla(anchoTablero, altoTablero);   //Ahora tenemos los valores :3
+		GameManager.instance.getInfoCasilla( out anchoTablero, out altoTablero);   //Ahora tenemos los valores :3
         tableroIA = new CasillaIA[anchoTablero, altoTablero];
 
         modo = modoAgente.Patrullando;
@@ -62,7 +64,7 @@ public class IAManager : MonoBehaviour {
     ///  Luego, quieres actualizar tu información del tablero con la info que tengas bajo tus pies(incluido si es hueco: te puto mueres), y quizá
     ///         sea bueno hacer estimaciones con diagonales de dónde puede estar un hueco, o un objetivo :3
     /// </summary>
-    void MovimientoAgente() {
+    public int MovimientoAgente() {
         //Tomamos e interpretamos la información de la nueva pos :3
 		analizaInfoGM();
 
@@ -70,32 +72,39 @@ public class IAManager : MonoBehaviour {
         {
             case modoAgente.Patrullando:
                 //Hace un paso de la lógica 
-				patrulla();
+				return patrulla();
                 break;
 
             case modoAgente.Analizando:
                 //Hace un paso de la lógca de buscar
+				return busca();
                 break;
 
             case modoAgente.Volviendo:
                 //Ejecuta un paso del A* para volver a casa
+				return vueltaACasa();
                 break;
 
-            case modoAgente.Muerto:
-                //Pues te has muerto jajja
+			case modoAgente.Muerto:
+			//El personaje muere y vulve a la casilla de salida (casa)
+			//Además se reinicia el tablero, la IA vuelve a no conocer nada
+			//¿Vuelve a generarse de forma aleatoria?
+
+			return -1;
 
                 break;
         }
+		return 666; //;)
     }
 
     //Módulo para el estado de patrulla
-    void patrulla()
+    int patrulla()
     {
         //lA PATRULLA funciona de la sigiente forma:
 		// Si encuentras el arma, pones una cola con direcciones fijas que hacer. Las siguientes iteraciones usarán esos movimientos
 		//Que prevalecen sobre todo.
 		// Si hay una desconocida, se mueve ahí.
-		// Si no hay desconocidas, de mueve a las de riesgo. (Necesidad)
+		// Si no hay desconocidas, se mueve a las de riesgo. (Necesidad)
 		// Si TODAS son ok, seleccionas una aleatoria
 
 		//Si hay desconocida y ok, vas a desconocida. Si hay mas de una desconocida, aleatoria.
@@ -104,32 +113,72 @@ public class IAManager : MonoBehaviour {
 		if (movimientosPlaneados.Count != 0) {
 			//Haces un pop y se lo mandas al GM(?)
 			//Si sabes que vas hacia un riesgo o una ok, no vayas: pasas a la siguiente.
-			
+			Movimiento sig = movimientosPlaneados.Peek();
+			movimientosPlaneados.Dequeue ();
+			return (int)sig;	
 		} 
 		else {
 
-			if(
+			//Buscamos lo que hay alrededor del personaje para decidir donde se mueve a continuación (tableroIA)
+			for (int i = 0; i < 4; i++) {
+				switch (i) {
+				case 0: //norte
+					if (tableroY - 1 >= 0)
+						alrededores[i] = tableroIA [tableroX, tableroY - 1].infoCasilla;
+					break;
 
+				case 1: //sur
+					if (tableroY + 1 < altoTablero)
+						alrededores[i] = tableroIA [tableroX, tableroY + 1].infoCasilla;
+					break;
 
+				case 2: //este
+					if (tableroX + 1 < anchoTablero)
+						alrededores[i] = tableroIA [tableroX + 1, tableroY].infoCasilla;
+					break;
 
+				case 3: //oeste
+					if (tableroX - 1 >= 0)
+						alrededores[i] = tableroIA [tableroX -1, tableroY].infoCasilla;
+					break;
 
+				}
+			}
+
+			int k = 0;
+			//Buscamos si hay alguna casilla desconocida
+			while (k < 4 && alrededores [k] != percepcionCasilla.desconocido) k++;
+
+			if (k != 4)
+				return k;
+			else {
+
+				k = 0;
+				while (k < 4 && alrededores [k] != percepcionCasilla.riesgo) k++;
+				if (k != 4)
+					return k;
+				else
+					return Random.Range (0, 3);
+
+			}
 		}
         
     }
 
 
     //Módulo para la busqueda perimetral 
-    void busca()
+    int busca()
     {
 		//Podemos establecer una matriz de busqueda.
 					//Aqui va la sangre ;3 
+		return 666;
 
     }
 
     //Para la vuelta a casa
-    void vueltaACasa()
+    int vueltaACasa()
     {
-
+		return 666;
     }
 
 
@@ -141,8 +190,8 @@ public class IAManager : MonoBehaviour {
     void analizaInfoGM()
     {
         //Recibes un int, que representa cierta información del GM que la IA va a interpretar a su manera.
-		int tableroX, tableroY;
-        int gmInfo = gm.getInfoCasilla(tableroX, tableroY);
+		//int tableroX, tableroY;
+		int gmInfo = GameManager.instance.getInfoCasilla( out tableroX, out tableroY);
 
 		//Ahora con un switch vamos a interpretarlo y en funcion de eso modificar
 		//tanto la informacion local del tablero como el modo
@@ -158,6 +207,7 @@ public class IAManager : MonoBehaviour {
 			break;
 
 		case 2: //sueloVacio -> ok
+			
 			tableroIA[tableroX, tableroY] = percepcionCasilla.ok;
 			break;
 
