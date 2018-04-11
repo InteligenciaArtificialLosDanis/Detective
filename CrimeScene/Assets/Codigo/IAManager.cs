@@ -26,7 +26,7 @@ public class IAManager : MonoBehaviour {
     //Booleanos de control
     bool muertoEncontrado;
     bool armaEncontrada;
-    bool paLaCama;              //Determina si, al volver a casa, la partida debe terminar
+    bool aLaCama;              //Determina si, al volver a casa, la partida debe terminar
 
 	//Stack de movimientos
 	Queue <Movimiento> movimientosPlaneados;
@@ -51,7 +51,7 @@ public class IAManager : MonoBehaviour {
 		
 	}
 
-    //MÉTODO PRINCIPAL AAAA//
+    //MÉTODO PRINCIPAL//
     /// <summary>
     /// Primero, toma la información de la casilla en la que está actualmente (según el movimiento anterior, o "casa" si es el primnero)
     /// Después. en función del estado en el qe se encuentre llama a un módulo que analiza la información que tenemos hasta este momento
@@ -166,7 +166,7 @@ public class IAManager : MonoBehaviour {
     int busca()
     {
         //Podemos establecer una matriz de busqueda.
-        //Aqui va la sangre ;3 
+        //Aqui va la sangre
         GameManager.instance.IACompletedPuzzle(); //TEST
 		return 666;
 
@@ -199,7 +199,7 @@ public class IAManager : MonoBehaviour {
 			    //Realmente no hace nada
 			    break;
 
-		    case 1: //Hueco -> te has muerto :3
+		    case 1: //Hueco -> te has muerto
 			    modo = modoAgente.Muerto;
 			    break;
 
@@ -208,10 +208,10 @@ public class IAManager : MonoBehaviour {
 			    tableroIA[tableroX, tableroY] = percepcionCasilla.ok;
 			    break;
 
-		    case 3: //sueloArma -> un objetivo completado! :3
+		    case 3: //sueloArma -> un objetivo completado!
 			    armaEncontrada = true;
 			    if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
-				    paLaCama = true;
+				    aLaCama = true;
 			
 			    tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
 			    //Metes las cuatro direcciones 
@@ -240,7 +240,7 @@ public class IAManager : MonoBehaviour {
 	
 			    //Si no estabas en busca, te pones a ello.
 			
-			    if (modo == modoAgente.Analizando && paLaCama)
+			    if (modo == modoAgente.Analizando && aLaCama)
 				    modo = modoAgente.Volviendo;
 			
 			    break;
@@ -264,7 +264,7 @@ public class IAManager : MonoBehaviour {
               case 6: //NubeArma
                     armaEncontrada = true;
                     if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
-                        paLaCama = true;
+                        aLaCama = true;
 
                     tableroIA[tableroX, tableroY] = percepcionCasilla.nube;
                     analizaTerreno(tableroX, tableroY);
@@ -273,7 +273,7 @@ public class IAManager : MonoBehaviour {
              case 7:
                     muertoEncontrado = true;
                     if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
-                        paLaCama = true;
+                        aLaCama = true;
 
                     tableroIA[tableroX, tableroY] = percepcionCasilla.nube;
                     analizaTerreno(tableroX, tableroY);
@@ -291,7 +291,7 @@ public class IAManager : MonoBehaviour {
 		    case 9: //muerto -> yay, otro objetivo! 
 			    muertoEncontrado = true;
 			    if (armaEncontrada && muertoEncontrado) //Determina si has completado la busqueda
-				    paLaCama = true;
+				    aLaCama = true;
 
 			    tableroIA [tableroX, tableroY] = percepcionCasilla.ok;
 
@@ -299,7 +299,7 @@ public class IAManager : MonoBehaviour {
 			    break;
 
 		    case 10: //Casa -> si tienes los dos objetivos, has ganado. Si no, no.
-			    if (paLaCama) {
+			    if (aLaCama) {
                         //HAS GANADO :333
                         GameManager.instance.IACompletedPuzzle();
 			    }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
 
@@ -53,20 +54,30 @@ public class GameManager : MonoBehaviour {
 		instance = this;
 
 		tablero = new TipoCasilla [anchoTablero, altoTablero];
-		//Creamos el tablero todo a vacio.
-		for (int i = 0; i < anchoTablero; i++) {
-			for (int j = 0; j < altoTablero; j++) {
-				tablero [i, j] = TipoCasilla.vacio;
-			}
-		}
-		creaTablero (tablero);
-		instanciaMovidas (tablero);
-	}
+        //Creamos el tablero todo a vacio.
+        //Creamos el tablero todo a vacio.
+        for (int i = 0; i < anchoTablero; i++)
+        {
+            for (int j = 0; j < altoTablero; j++)
+            {
+                tablero[i, j] = TipoCasilla.vacio;
+            }
+        }
+        creaTablero(tablero);
+        instanciaMovidas(tablero);
+    }
 	
 	// Update is called once per frame
 	void Update () {
 		
 	}
+
+    public void Reinicia()
+    {
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+    }
 
 
     ///////////////////////////////////////
@@ -91,23 +102,41 @@ public class GameManager : MonoBehaviour {
                     break;
 
                 case 0: //Se mueve al norte.
-                    yJugador--;
-                    agente.transform.Translate(0, +1, 0); //En coordenadas de Unity va al reves
+                    if (yJugador - 1 >= 0)
+                    {
+                        yJugador--;
+                        agente.transform.Translate(0, +1, 0); //En coordenadas de Unity va al reves
+                    }
                     break;
 
                 case 1: //Se mueve al sur.
-                    yJugador++;
-                    agente.transform.Translate(0, -1, 0);
+
+                    if (yJugador + 1 < altoTablero)
+                    {
+                        yJugador++;
+                        agente.transform.Translate(0, -1, 0);
+                    }
+                    
                     break;
 
                 case 2: //Se mueve al este.
-                    xJugador++;
-                    agente.transform.Translate (+1, 0, 0);
+
+                    if (xJugador + 1 < anchoTablero)
+                    {
+                        xJugador++;
+                        agente.transform.Translate(+1, 0, 0);
+                    }
+                    
                     break;
 
                 case 3: //Se mueve al oeste.
-                    xJugador--;
-                    agente.transform.Translate(-1, 0, 0);
+
+                    if (xJugador - 1 >= 0)
+                    {
+                        xJugador--;
+                        agente.transform.Translate(-1, 0, 0);
+                    }
+                    
                     break;
 
                 default:
@@ -200,13 +229,16 @@ public class GameManager : MonoBehaviour {
 				
 				case TipoCasilla.muerto:
 					instanciameEsta (muerto, i, j);
-					break;
+                    instanciameEsta(suelo, i, j);
+                    break;
 
 
 				//-casa
 				case TipoCasilla.casa:
 					instanciameEsta (casa, i, j);
-                    instanciameEsta(agente, i, j);
+                    instanciameEsta(suelo, i, j);
+                        //Teletransport
+                        agente.transform.position = new Vector3(i, j, 0);
                     break;
 
 				}
